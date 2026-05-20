@@ -27,17 +27,22 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "not inside a git re
 github_url="$(git remote get-url "$GITHUB_REMOTE_NAME" 2>/dev/null || true)"
 [ "$github_url" = "$GITHUB_REMOTE_URL" ] || fail "remote $GITHUB_REMOTE_NAME must point to $GITHUB_REMOTE_URL"
 
-git fetch "$PRIMARY_REMOTE_NAME" "$PRIMARY_BRANCH" --tags
-git fetch "$GITHUB_REMOTE_NAME" --tags
-git fetch "$GITHUB_REMOTE_NAME" "$PRIMARY_BRANCH" >/dev/null 2>&1 || true
+git fetch --no-tags \
+  "$PRIMARY_REMOTE_NAME" \
+  "+refs/heads/$PRIMARY_BRANCH:refs/remotes/$PRIMARY_REMOTE_NAME/$PRIMARY_BRANCH"
+git fetch --no-tags \
+  "$GITHUB_REMOTE_NAME" \
+  "+refs/heads/$PRIMARY_BRANCH:refs/remotes/$GITHUB_REMOTE_NAME/$PRIMARY_BRANCH" \
+  >/dev/null 2>&1 || true
 
 current_commit="$(git rev-parse HEAD)"
 primary_commit="$(git rev-parse "$PRIMARY_REMOTE_NAME/$PRIMARY_BRANCH")"
 [ "$current_commit" = "$primary_commit" ] || fail "$PRIMARY_REMOTE_NAME/$PRIMARY_BRANCH is not at HEAD"
 
+github_parent_args=""
 if git rev-parse -q --verify "refs/remotes/$GITHUB_REMOTE_NAME/$PRIMARY_BRANCH" >/dev/null; then
   github_commit="$(git rev-parse "$GITHUB_REMOTE_NAME/$PRIMARY_BRANCH")"
-  git merge-base --is-ancestor "$github_commit" "$current_commit" || fail "$GITHUB_REMOTE_NAME/$PRIMARY_BRANCH is not an ancestor of HEAD"
+  github_parent_args="-p $github_commit"
 fi
 
 if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
@@ -53,8 +58,16 @@ if git ls-remote --exit-code --tags "$GITHUB_REMOTE_NAME" "refs/tags/$TAG" >/dev
 fi
 
 git tag -a "$TAG" -m "Snapshot $TAG"
+github_snapshot_commit="$(
+  # shellcheck disable=SC2086
+  git commit-tree "$current_commit^{tree}" $github_parent_args \
+    -m "Snapshot $TAG" \
+    -m "GitLab commit: $current_commit"
+)"
+
 git push "$PRIMARY_REMOTE_NAME" "$TAG"
-git push "$GITHUB_REMOTE_NAME" "HEAD:refs/heads/$PRIMARY_BRANCH"
-git push "$GITHUB_REMOTE_NAME" "$TAG"
+git push "$GITHUB_REMOTE_NAME" \
+  "$github_snapshot_commit:refs/heads/$PRIMARY_BRANCH" \
+  "$github_snapshot_commit:refs/tags/$TAG"
 
 printf 'published snapshot %s to %s tags and %s/%s\n' "$TAG" "$PRIMARY_REMOTE_NAME" "$GITHUB_REMOTE_NAME" "$PRIMARY_BRANCH"

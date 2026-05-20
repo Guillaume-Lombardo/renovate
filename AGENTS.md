@@ -10,7 +10,7 @@ These instructions apply to Codex, OpenCode, and other agents that read `AGENTS.
 - Treat `github` as the GitHub snapshot-controlled remote.
 - Push normal branches and `main` only to GitLab.
 - Do not manually push `main` to GitHub in the normal workflow.
-- Publish GitHub snapshots only with `scripts/publish-github-snapshot.sh`.
+- Publish GitHub snapshots only with `scripts/publish-github-snapshot.sh`; it creates synthetic commits for `github/main`.
 - Keep secrets in `.env`; never commit `.env`.
 
 ## Skills

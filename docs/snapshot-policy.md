@@ -2,7 +2,7 @@
 
 GitLab is the primary remote and receives normal branch pushes.
 
-GitHub is the secondary remote for public snapshots only. Its `main` branch exists, but it is advanced only by the snapshot workflow.
+GitHub is the secondary remote for public snapshots only. Its `main` branch is a synthetic snapshot history: each commit on `github/main` represents one published snapshot tree.
 
 Configure the GitHub remote with:
 
@@ -22,7 +22,13 @@ The script verifies:
 - The current branch is `main`.
 - `origin/main` points to the current commit.
 - The `github` remote points to `https://github.com/Guillaume-Lombardo/renovate.git`.
-- Existing `github/main`, when present, is an ancestor of the current commit.
 - The tag does not already exist locally or on either remote.
 
-It then creates one annotated tag, pushes that tag to GitLab, and pushes both `main` and the tag to GitHub. Normal branch work still goes to GitLab only.
+It then:
+
+- Creates an annotated tag on the real GitLab `main` commit and pushes it to GitLab.
+- Creates a synthetic GitHub snapshot commit from the same tree.
+- Pushes that synthetic commit to `github/main`.
+- Pushes the GitHub tag to that synthetic commit.
+
+Normal branch work still goes to GitLab only. Do not push GitLab history to GitHub.

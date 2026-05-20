@@ -40,6 +40,38 @@ validate_json:
         node -e "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'))" "$file"
       done
 
+validate_secrets:
+  stage: validate
+  image: python:3.13-alpine
+  before_script:
+    - pip install --no-cache-dir detect-secrets==1.5.0
+  script:
+    - |
+      set -eu
+      detect-secrets scan \
+        --all-files \
+        --exclude-files '^\.git/' \
+        --exclude-files '^\.env$' \
+        > detect-secrets.json
+      python - <<'PY'
+      import json
+      import sys
+
+      with open("detect-secrets.json", encoding="utf-8") as report_file:
+          findings = json.load(report_file)["results"]
+
+      if findings:
+          for path, path_findings in sorted(findings.items()):
+              lines = ", ".join(
+                  str(finding["line_number"]) for finding in path_findings
+              )
+              print(
+                  f"{path}: potential secret on line(s) {lines}",
+                  file=sys.stderr,
+              )
+          sys.exit(1)
+      PY
+
 validate_dockerfiles:
   stage: validate
   image:

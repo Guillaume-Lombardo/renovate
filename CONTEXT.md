@@ -8,11 +8,11 @@ This repository packages a self-hosted Renovate deployment for `gitlab.g1lom.xyz
 
 Primary remote: GitLab, configured as `origin`.
 
-Secondary remote: GitHub, configured as `github`, used only for public snapshots.
+Secondary remote: GitHub, configured as `github`, used only for public snapshots. Its `main` branch is synthetic and contains one commit per snapshot.
 
 ## Snapshot
 
-A snapshot is an annotated Git tag pushed to both GitLab and GitHub. The tag points to the same commit on both remotes, and `github/main` is advanced to that commit.
+A snapshot is an annotated Git tag on GitLab and a synthetic commit on GitHub. Both remotes expose the same tag name and repository tree, but GitHub does not receive the full GitLab history.
 
 Publish snapshots with:
 

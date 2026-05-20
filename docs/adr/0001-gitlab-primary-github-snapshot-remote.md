@@ -24,7 +24,7 @@ https://gitlab.g1lom.xyz/g1lom/renovate.git
 https://github.com/Guillaume-Lombardo/renovate.git
 ```
 
-GitHub has a `main` branch, but it is snapshot-controlled. Normal branch work is pushed to GitLab only; `github/main` is advanced only by the snapshot script.
+GitHub has a `main` branch, but it is snapshot-controlled and synthetic. Normal branch work is pushed to GitLab only; `github/main` contains one commit per published snapshot, created from the GitLab commit tree.
 
 Snapshots are published with:
 
@@ -35,6 +35,7 @@ scripts/publish-github-snapshot.sh vYYYY.MM.DD
 ## Consequences
 
 - GitHub `main` is updated only at snapshot publication time.
-- Snapshot tags on GitLab and GitHub point to the same commit.
+- GitHub `main` does not contain every GitLab `main` commit.
+- Snapshot tags on GitLab and GitHub use the same tag names but point to different commits with the same tree.
 - Agents and humans must not manually use `git push github main` for the normal workflow.
 - The publishing script is the canonical path for GitHub updates.

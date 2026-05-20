@@ -87,7 +87,7 @@ registry.g1lom.xyz/g1lom/renovate:<commit-sha>
 
 GitLab is the primary remote (`origin`) and receives normal branch pushes.
 
-GitHub is a secondary snapshot-controlled remote:
+GitHub is a secondary snapshot-controlled remote. Its `main` branch contains one synthetic commit per published snapshot:
 
 ```text
 github  https://github.com/Guillaume-Lombardo/renovate.git
@@ -105,7 +105,7 @@ Publish a GitHub snapshot from `main` with:
 scripts/publish-github-snapshot.sh vYYYY.MM.DD
 ```
 
-The script creates one annotated tag, pushes that tag to both GitLab and GitHub, and advances `github/main` to the snapshot commit. Do not push `main` to GitHub outside this script. See `docs/snapshot-policy.md` and `docs/adr/0001-gitlab-primary-github-snapshot-remote.md`.
+The script tags the real GitLab commit, creates a synthetic GitHub commit with the same tree, advances `github/main` to that synthetic commit, and points the GitHub tag at it. Do not push `main` to GitHub outside this script. See `docs/snapshot-policy.md` and `docs/adr/0001-gitlab-primary-github-snapshot-remote.md`.
 
 The repository also includes a compatible skill for Codex, Claude, and OpenCode:
 
