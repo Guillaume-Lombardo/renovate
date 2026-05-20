@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "dependencyDashboard": true,
+  "minimumReleaseAge": "2 days",
+  "internalChecksFilter": "strict",
+  "labels": ["dependencies"],
+  "separateMajorMinor": true,
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchManagers": ["docker-compose", "dockerfile", "gitlabci"],
+      "groupName": "container and CI dependencies"
+    }
+  ]
+}

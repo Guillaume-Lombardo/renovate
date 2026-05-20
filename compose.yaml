@@ -1,0 +1,38 @@
+services:
+  renovate:
+    image: registry.g1lom.xyz:443/g1lom/renovate:latest
+    container_name: renovate
+    user: "1000:1000"
+    restart: unless-stopped
+    init: true
+    environment:
+      RENOVATE_TOKEN: ${RENOVATE_TOKEN:?Set RENOVATE_TOKEN in .env or in Dockhand secrets}
+      GITHUB_COM_TOKEN: ${GITHUB_COM_TOKEN:-}
+      RENOVATE_GIT_AUTHOR: ${RENOVATE_GIT_AUTHOR:-Renovate Bot <plain.rose9051@fastmail.com>}
+      RENOVATE_AUTODISCOVER_FILTER: ${RENOVATE_AUTODISCOVER_FILTER:-g1lom/*}
+      RENOVATE_ASSIGNEES: ${RENOVATE_ASSIGNEES-g1lom}
+      RENOVATE_REVIEWERS: ${RENOVATE_REVIEWERS-g1lom}
+      RENOVATE_DASHBOARD_MENTIONS: ${RENOVATE_DASHBOARD_MENTIONS-g1lom}
+      RENOVATE_RUN_INTERVAL_SECONDS: ${RENOVATE_RUN_INTERVAL_SECONDS:-21600}
+      GITLAB_URL: ${GITLAB_URL:-https://gitlab.g1lom.xyz}
+      GITLAB_PROJECT_OWNER: ${GITLAB_PROJECT_OWNER:-g1lom}
+      GITLAB_ADMIN_TOKEN: ${GITLAB_ADMIN_TOKEN:-}
+      GITLAB_RENOVATE_BOT_USER_ID: ${GITLAB_RENOVATE_BOT_USER_ID:-}
+      GITLAB_RENOVATE_ACCESS_LEVEL: ${GITLAB_RENOVATE_ACCESS_LEVEL:-30}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      RENOVATE_CONFIG_FILE: /usr/src/app/config.js
+      RENOVATE_BASE_DIR: /tmp/renovate
+      RENOVATE_CACHE_DIR: /tmp/renovate/cache
+      RENOVATE_REPOSITORY_CACHE: enabled
+    command: ["sh", "/usr/local/bin/run-renovate.sh"]
+    volumes:
+      - renovate-cache:/tmp/renovate
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+
+volumes:
+  renovate-cache:

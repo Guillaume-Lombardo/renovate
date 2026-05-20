@@ -1,0 +1,6 @@
+---
+ignored:
+  # This image intentionally tracks Renovate's latest published runtime.
+  - DL3007
+  # Compose sets the runtime user and grants only the required capability.
+  - DL3002

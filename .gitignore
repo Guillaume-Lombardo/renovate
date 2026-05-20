@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+
+# Local runtime data
+cache/
+logs/
+
+# Editor and OS noise
+.DS_Store
+.idea/
+.vscode/
