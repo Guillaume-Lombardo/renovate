@@ -7,9 +7,9 @@ These instructions apply to Codex, OpenCode, and other agents that read `AGENTS.
 ## Repository Rules
 
 - Treat `origin` as the GitLab primary remote.
-- Treat `github` as the GitHub snapshot-only remote.
+- Treat `github` as the GitHub snapshot-controlled remote.
 - Push normal branches and `main` only to GitLab.
-- Do not push `main` to GitHub in the normal workflow.
+- Do not manually push `main` to GitHub in the normal workflow.
 - Publish GitHub snapshots only with `scripts/publish-github-snapshot.sh`.
 - Keep secrets in `.env`; never commit `.env`.
 

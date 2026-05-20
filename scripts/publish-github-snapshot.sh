@@ -29,10 +29,16 @@ github_url="$(git remote get-url "$GITHUB_REMOTE_NAME" 2>/dev/null || true)"
 
 git fetch "$PRIMARY_REMOTE_NAME" "$PRIMARY_BRANCH" --tags
 git fetch "$GITHUB_REMOTE_NAME" --tags
+git fetch "$GITHUB_REMOTE_NAME" "$PRIMARY_BRANCH" >/dev/null 2>&1 || true
 
 current_commit="$(git rev-parse HEAD)"
 primary_commit="$(git rev-parse "$PRIMARY_REMOTE_NAME/$PRIMARY_BRANCH")"
 [ "$current_commit" = "$primary_commit" ] || fail "$PRIMARY_REMOTE_NAME/$PRIMARY_BRANCH is not at HEAD"
+
+if git rev-parse -q --verify "refs/remotes/$GITHUB_REMOTE_NAME/$PRIMARY_BRANCH" >/dev/null; then
+  github_commit="$(git rev-parse "$GITHUB_REMOTE_NAME/$PRIMARY_BRANCH")"
+  git merge-base --is-ancestor "$github_commit" "$current_commit" || fail "$GITHUB_REMOTE_NAME/$PRIMARY_BRANCH is not an ancestor of HEAD"
+fi
 
 if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
   fail "local tag already exists: $TAG"
@@ -48,6 +54,7 @@ fi
 
 git tag -a "$TAG" -m "Snapshot $TAG"
 git push "$PRIMARY_REMOTE_NAME" "$TAG"
+git push "$GITHUB_REMOTE_NAME" "HEAD:refs/heads/$PRIMARY_BRANCH"
 git push "$GITHUB_REMOTE_NAME" "$TAG"
 
-printf 'published snapshot %s to %s and %s\n' "$TAG" "$PRIMARY_REMOTE_NAME" "$GITHUB_REMOTE_NAME"
+printf 'published snapshot %s to %s tags and %s/%s\n' "$TAG" "$PRIMARY_REMOTE_NAME" "$GITHUB_REMOTE_NAME" "$PRIMARY_BRANCH"
